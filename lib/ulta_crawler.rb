@@ -1,22 +1,13 @@
 require_relative 'ulta_crawler/crawler'
+require_relative 'ulta_crawler/default_provider'
 require_relative 'ulta_crawler/request'
 require_relative 'ulta_crawler/request_reader'
 
 
 class UltaCrawler
 
-  DEFAULT_PROVIDER_PATH = './ulta_crawler/default_provider.rb'.freeze
-
   def initialize(opts = {})
-    provider_path = opts.delete(:provider_path) || default_provider_path
-    load provider_path
-
-    provider_name = File.basename(provider_path, '.rb').split('_').map(&:capitalize).join
-    provider = Object.const_get(provider_name)
-
-    provider.opts.merge(opts)
-    provider.opts.freeze
-
+    provider = prepare_provider(opts)
     @crawler = Crawler.new(provider)
   end
 
@@ -24,11 +15,30 @@ class UltaCrawler
     @crawler.run
   end
 
+  def self.opts
+    DefaultProvider.get_opts.map do |name, opts|
+      [name, opts[:desc], { type: opts[:type], default: opts[:value] }]
+    end
+  end
+
 private
 
-  def default_provider_path
-    gem_lib_dir = File.dirname(__FILE__)
-    File.join(gem_lib_dir, DEFAULT_PROVIDER_PATH)
+  def prepare_provider(opts)
+    provider_path = opts.delete(:provider_path)
+
+    if provider_path
+      load provider_path
+      provider_name = camel_case(File.basename(provider_path, '.rb'))
+      provider = Object.const_get(provider_name)
+      DefaultProvider.extend(provider)
+    end
+
+    DefaultProvider.merge_opts(opts)
+    DefaultProvider
+  end
+
+  def camel_case(string)
+    string.split('_').map(&:capitalize).join
   end
 
 end

@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+require 'optimist'
+require_relative '../lib/ulta_crawler'
+
+opts = Optimist::options do
+  UltaCrawler.opts.each do |opt_desc|
+    opt(*opt_desc)
+  end
+end
+
+UltaCrawler.new(opts).run
