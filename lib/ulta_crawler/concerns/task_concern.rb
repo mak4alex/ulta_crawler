@@ -1,7 +1,7 @@
 module TaskConcern
 
   def task
-    @task ||= create_task(task_opts)
+    @task ||= create_task(task_opts.merge({ run_now: true }))
   end
 
   def start

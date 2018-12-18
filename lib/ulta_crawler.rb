@@ -1,6 +1,6 @@
 require_relative 'ulta_crawler/crawler'
 require_relative 'ulta_crawler/default_provider'
-require_relative 'ulta_crawler/request'
+require_relative 'ulta_crawler/request/request'
 require_relative 'ulta_crawler/request_reader'
 
 

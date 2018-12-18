@@ -1,14 +1,14 @@
 require 'concurrent-ruby'
-require_relative 'response_queue'
-require_relative 'task_concern'
+require_relative 'response/queue'
+require_relative 'concerns/task_concern'
 
 
 class ResponseSaver
   include TaskConcern
 
-  def initialize(dest_dir, response_converter, task_opts)
+  def initialize(dest_dir, formatter_type, task_opts)
     @dest_dir           = dest_dir
-    @response_converter = response_converter
+    @response_converter = formatter
     @task_opts          = task_opts
     @response_queue     = ResponseQueue.new
   end

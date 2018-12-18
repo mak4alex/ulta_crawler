@@ -1,6 +1,7 @@
 require_relative '../request'
 
-class SimpleRequestConverter
+
+class SimpleRequestFormatter
 
   SEPARATOR = "\n".freeze
 

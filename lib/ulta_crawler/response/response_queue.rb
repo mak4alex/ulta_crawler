@@ -1,0 +1,2 @@
+class ResponseQueue
+end

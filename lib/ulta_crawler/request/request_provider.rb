@@ -1,12 +1,12 @@
 require 'concurrent-ruby'
-require_relative 'task_concern'
+require_relative '../concerns/task_concern'
 
 class RequestProvider
   include TaskConcern
 
   attr_reader :source_dir, :request_converter, :request_queue, :task_opts
 
-  def initialize(source_dir, request_converter, task_opts)
+  def initialize(source_dir, formatter_type, task_opts)
     @source_dir        = source_dir
     @request_converter = request_converter
     @task_opts         = task_opts

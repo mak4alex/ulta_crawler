@@ -1,5 +1,6 @@
-require_relative 'request_provider'
-require_relative 'response_saver'
+require_relative 'http/http_client_pool'
+require_relative 'request/request_provider'
+require_relative 'response/response_saver'
 
 
 class Crawler
@@ -12,12 +13,22 @@ class Crawler
     puts "Initialize crawler with provider: '#{provider}'"
 
     @request_provider = RequestProvider.new(
-      request_dir,
-      provider[:request_converter],
-      request_provider_task_opts
-    )
-    @response_saver   = ResponseSaver.new(response_dir)
-    @http_client_pool = HttpClientPool.new(@request_provider, @response_saver)
+      request_dir, @provider[:request_formatter_type], {
+      execution_interval: @provider[:request_reader_interval],
+      timeout_interval: @provider[:request_reader_timeout],
+    })
+    @response_saver   = ResponseSaver.new(
+      response_dir, @provider[:response_formatter_type], {
+      execution_interval: @provider[:response_saver_interval],
+      timeout_interval: @provider[:response_saver_timeout],
+    })
+    @http_client_pool = HttpClientPool.new(
+      @request_provider, @response_saver, {
+      client_count: @provider[:client_count],
+      execution_interval: @provider[:response_saver_interval],
+      timeout_interval: @provider[:response_saver_timeout],
+    })
+
     @tasks = [@request_provider, @http_client_pool, @response_saver]
   end
 
@@ -60,14 +71,6 @@ private
 
   def response_dir
     @response_dir ||= File.join(site_dir, @provider[:response_dir])
-  end
-
-  def request_provider_task_opts
-    {
-      execution_interval: @provider[:request_reader_interval],
-      timeout_interval: @provider[:request_reader_timeout],
-      run_now: true
-    }
   end
 
 end
