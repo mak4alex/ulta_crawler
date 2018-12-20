@@ -1,4 +1,5 @@
 require 'concurrent-ruby'
+require 'fileutils'
 require_relative 'response/queue'
 require_relative 'concerns/task_concern'
 
@@ -6,11 +7,12 @@ require_relative 'concerns/task_concern'
 class ResponseSaver
   include TaskConcern
 
-  def initialize(dest_dir, formatter_type, task_opts)
-    @dest_dir           = dest_dir
-    @response_converter = formatter
-    @task_opts          = task_opts
-    @response_queue     = ResponseQueue.new
+  attr_reader :dest_dir, :task_opts
+
+  def initialize(dest_dir, task_opts)
+    @dest_dir       = dest_dir
+    @task_opts      = task_opts
+    @response_queue = ResponseQueue.new
   end
 
   def save(response)
@@ -19,19 +21,16 @@ class ResponseSaver
 
 private
 
-  def write_to_file(response)
-
+  def save_response
+    response = @response_queue.pop
+    path = File.join(dest_dir, response.file_name)
+    FileUtils.mkdir_p(dest_dir)
+    File.write(path, response.format)
   end
 
-  def save_responses
-    while @response_queue.any?
-      write_to_file(@response_queue.get)
-    end
-  end
-
-  def create_task(opts)
-    Concurrent::TimerTask.new(opts) do
-      save_responses
+  def create_task
+    Concurrent::TimerTask.new(task_opts) do
+      save_response
     end
   end
 

@@ -52,6 +52,12 @@ class DefaultProvider
 
   class << self
 
+    def configure
+      #Request.set_formatter(formatter_type)
+
+
+    end
+
     def get_opt(key)
       @opts[key][:value]
     end

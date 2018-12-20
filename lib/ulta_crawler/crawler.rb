@@ -13,20 +13,19 @@ class Crawler
     puts "Initialize crawler with provider: '#{provider}'"
 
     @request_provider = RequestProvider.new(
-      request_dir, @provider[:request_formatter_type], {
+      request_dir, {
       execution_interval: @provider[:request_reader_interval],
       timeout_interval: @provider[:request_reader_timeout],
     })
     @response_saver   = ResponseSaver.new(
-      response_dir, @provider[:response_formatter_type], {
+      response_dir, {
       execution_interval: @provider[:response_saver_interval],
       timeout_interval: @provider[:response_saver_timeout],
     })
     @http_client_pool = HttpClientPool.new(
-      @request_provider, @response_saver, {
-      client_count: @provider[:client_count],
+      @request_provider, @response_saver, @provider[:client_count], {
       execution_interval: @provider[:response_saver_interval],
-      timeout_interval: @provider[:response_saver_timeout],
+      timeout_interval: @provider[:response_saver_timeout]
     })
 
     @tasks = [@request_provider, @http_client_pool, @response_saver]
