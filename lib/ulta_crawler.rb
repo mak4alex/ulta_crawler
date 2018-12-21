@@ -1,7 +1,5 @@
 require_relative 'ulta_crawler/crawler'
-require_relative 'ulta_crawler/default_provider'
-require_relative 'ulta_crawler/request/request'
-require_relative 'ulta_crawler/request_reader'
+require_relative 'ulta_crawler/default_site_config'
 
 
 class UltaCrawler
@@ -16,7 +14,7 @@ class UltaCrawler
   end
 
   def self.opts
-    DefaultProvider.get_opts.map do |name, opts|
+    DefaultSiteConfig.get_opts.map do |name, opts|
       [name, opts[:desc], { type: opts[:type], default: opts[:value] }]
     end
   end
@@ -24,17 +22,17 @@ class UltaCrawler
 private
 
   def prepare_provider(opts)
-    provider_path = opts.delete(:provider_path)
+    site_config_path = opts.delete(:site_config_path)
 
-    if provider_path
-      load provider_path
-      provider_name = camel_case(File.basename(provider_path, '.rb'))
+    if site_config_path
+      load site_config_path
+      provider_name = camel_case(File.basename(site_config_path, '.rb'))
       provider = Object.const_get(provider_name)
-      DefaultProvider.extend(provider)
+      DefaultSiteConfig.extend(provider)
     end
 
-    DefaultProvider.merge_opts(opts)
-    DefaultProvider
+    DefaultSiteConfig.merge_opts(opts)
+    DefaultSiteConfig
   end
 
   def camel_case(string)

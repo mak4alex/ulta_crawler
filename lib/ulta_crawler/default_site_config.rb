@@ -1,6 +1,6 @@
-class DefaultProvider
+class DefaultSiteConfig
   @opts = {
-    worker_count: {
+    client_count: {
       desc: 'Some text',
       value: 3
     },

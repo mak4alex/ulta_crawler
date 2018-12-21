@@ -13,22 +13,25 @@ class Crawler
     puts "Initialize crawler with provider: '#{provider}'"
 
     @request_provider = RequestProvider.new(
-      request_dir, {
+      site_request_dir, {
       execution_interval: @provider[:request_reader_interval],
       timeout_interval: @provider[:request_reader_timeout],
     })
     @response_saver   = ResponseSaver.new(
-      response_dir, {
+      site_response_dir, {
       execution_interval: @provider[:response_saver_interval],
       timeout_interval: @provider[:response_saver_timeout],
     })
     @http_client_pool = HttpClientPool.new(
-      @request_provider, @response_saver, @provider[:client_count], {
+      @request_provider, @response_saver, {
+      client_count: @provider[:client_count],
       execution_interval: @provider[:response_saver_interval],
       timeout_interval: @provider[:response_saver_timeout]
     })
 
     @tasks = [@request_provider, @http_client_pool, @response_saver]
+
+    trap_signals
   end
 
   def run
@@ -37,8 +40,10 @@ class Crawler
     while running?
       puts "Crawler alive and running at #{Time.now}"
 
-      sleep( @provider[:main_loop_interval])
+      sleep(@provider[:main_loop_interval])
     end
+
+    exit(0)
   end
 
   def shutdown
@@ -64,12 +69,17 @@ private
     @site_dir ||= File.join(@provider[:work_dir], @provider[:site_name])
   end
 
-  def request_dir
+  def site_request_dir
     @request_dir ||= File.join(site_dir, @provider[:request_dir])
   end
 
-  def response_dir
+  def site_response_dir
     @response_dir ||= File.join(site_dir, @provider[:response_dir])
+  end
+
+  def trap_signals
+    trap('SIGINT') { shutdown }
+    trap('TERM') { shutdown }
   end
 
 end

@@ -1,15 +1,15 @@
-require 'concurrent-ruby'
 require_relative '../concerns/task_concern'
 
 class RequestProvider
   include TaskConcern
 
-  attr_reader :source_dir, :request_queue, :task_opts
+  attr_reader :source_dir, :request_queue
 
-  def initialize(source_dir, task_opts)
+  def initialize(source_dir, opts)
     @source_dir    = source_dir
-    @task_opts     = task_opts
     @request_queue = RequestQueue.new
+
+    create_task(opts) { fill_queue }
   end
 
   def get
@@ -39,9 +39,4 @@ private
     read_request_files.each { |request| request_queue << request }
   end
 
-  def create_task
-    Concurrent::TimerTask.new(task_opts) do
-      fill_queue
-    end
-  end
 end
