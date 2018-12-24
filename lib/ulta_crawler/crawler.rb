@@ -5,29 +5,17 @@ require_relative 'response/response_saver'
 
 class Crawler
 
-  attr_reader :tasks
+  attr_reader :tasks, :site_config
 
-  def initialize(provider)
+  def initialize(site_config)
     @crawler_alive = true
-    @provider = provider
-    puts "Initialize crawler with provider: '#{provider}'"
+    @site_config   = site_config
+    puts "Initialize crawler with site_config: '#{site_config}'"
 
-    @request_provider = RequestProvider.new(
-      site_request_dir, {
-      execution_interval: @provider[:request_reader_interval],
-      timeout_interval: @provider[:request_reader_timeout],
-    })
-    @response_saver   = ResponseSaver.new(
-      site_response_dir, {
-      execution_interval: @provider[:response_saver_interval],
-      timeout_interval: @provider[:response_saver_timeout],
-    })
+    @request_provider = RequestProvider.new(site_config)
+    @response_saver   = ResponseSaver.new(site_config)
     @http_client_pool = HttpClientPool.new(
-      @request_provider, @response_saver, {
-      client_count: @provider[:client_count],
-      execution_interval: @provider[:response_saver_interval],
-      timeout_interval: @provider[:response_saver_timeout]
-    })
+        @request_provider, @response_saver, site_config)
 
     @tasks = [@request_provider, @http_client_pool, @response_saver]
 
@@ -39,8 +27,7 @@ class Crawler
 
     while running?
       puts "Crawler alive and running at #{Time.now}"
-
-      sleep(@provider[:main_loop_interval])
+      sleep(site_config[:main_loop_interval])
     end
 
     exit(0)
@@ -58,23 +45,13 @@ class Crawler
 private
 
   def start_tasks
+    puts 'Start crawler tasks'
     tasks.each(&:start)
   end
 
   def shutdown_tasks
+    puts 'Shutdown crawler tasks'
     tasks.each(&:shutdown)
-  end
-
-  def site_dir
-    @site_dir ||= File.join(@provider[:work_dir], @provider[:site_name])
-  end
-
-  def site_request_dir
-    @request_dir ||= File.join(site_dir, @provider[:request_dir])
-  end
-
-  def site_response_dir
-    @response_dir ||= File.join(site_dir, @provider[:response_dir])
   end
 
   def trap_signals

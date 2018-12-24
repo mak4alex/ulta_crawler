@@ -16,11 +16,15 @@ class DefaultSiteConfig
       desc: 'Some text',
       value: 'request'
     },
+    request_type: {
+      desc: 'Some text',
+      value: 'simple'
+    },
     response_dir: {
       desc: 'Some text',
       value: 'response'
     },
-    http_client: {
+    http_backend_type: {
       desc: 'Some text',
       value: 'watir'
     },
@@ -36,15 +40,27 @@ class DefaultSiteConfig
       desc: 'Some text',
       value: 60
     },
-    request_reader_interval: {
+    request_interval: {
       desc: 'Some text',
       value: 60
     },
-    request_reader_timeout: {
+    request_timeout: {
       desc: 'Some text',
       value: 60
     },
-    crawl_request_interval: {
+    crawl_interval: {
+      desc: 'Some text',
+      value: 3
+    },
+    crawl_timeout: {
+      desc: 'Some text',
+      value: 3
+    },
+    response_interval: {
+      desc: 'Some text',
+      value: 3
+    },
+    response_timeout: {
       desc: 'Some text',
       value: 3
     }
@@ -70,6 +86,18 @@ class DefaultSiteConfig
 
     def merge_opts(opts)
 
+    end
+
+    def site_dir
+      @site_dir ||= File.join(get_opt(:work_dir), get_opt(:site_name))
+    end
+
+    def site_request_dir
+      @request_dir ||= File.join(site_dir, get_opt(:request_dir))
+    end
+
+    def site_response_dir
+      @response_dir ||= File.join(site_dir, get_opt(:response_dir))
     end
 
   end

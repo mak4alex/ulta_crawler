@@ -1,2 +1,0 @@
-class Watir
-end

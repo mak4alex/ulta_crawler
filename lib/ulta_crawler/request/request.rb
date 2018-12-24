@@ -9,8 +9,6 @@ class Request
     @request_formatter = RequestFormatterFactory.get(type)
   end
 
-  set_formatter(:simple)
-
   def self.from_string(string)
     @request_formatter.from_string(string)
   end

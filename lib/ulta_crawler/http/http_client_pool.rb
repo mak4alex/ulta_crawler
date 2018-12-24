@@ -1,4 +1,4 @@
-require 'http_client'
+require_relative 'http_client'
 
 
 class HttpClientPool

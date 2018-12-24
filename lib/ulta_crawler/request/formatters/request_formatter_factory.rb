@@ -1,15 +1,16 @@
 require_relative 'simple_request_formatter'
 
+require 'pry'
 
 class RequestFormatterFactory
 
-  TYPES = [:simple]
+  TYPES = %w{ simple }
 
-  def self.get(formatter_type)
-    case formatter_type
-    when :simple then SimpleRequestFormatter.new
+  def self.get(type)
+    case type
+    when 'simple' then SimpleRequestFormatter.new
     else
-      raise "Unknown type: #{formatter_type}! Available formatter types: #{TYPES}."
+      raise "Unknown type: #{type}! Available formatter types: #{TYPES}."
     end
   end
 

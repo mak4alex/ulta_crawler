@@ -3,14 +3,14 @@ require 'concurrent-ruby'
 
 module TaskConcern
 
-  attr_reader task
+  attr_reader :task
 
   def create_task(opts)
-    opts.merge!({ run_now: true })
     @task = Concurrent::TimerTask.new(opts) { yield }
   end
 
   def start
+    init if defined?(init)
     task.execute
   end
 

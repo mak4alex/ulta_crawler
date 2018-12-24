@@ -1,7 +1,6 @@
 require_relative 'ulta_crawler/crawler'
 require_relative 'ulta_crawler/default_site_config'
 
-
 class UltaCrawler
 
   def initialize(opts = {})
