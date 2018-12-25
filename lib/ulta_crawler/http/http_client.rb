@@ -5,13 +5,15 @@ require_relative 'backends/http_backend_factory'
 class HttpClient
   include TaskConcern
 
-  attr_reader :site_config, :request_provider, :response_saver, :backend
+  attr_reader :site_config, :request_provider, :response_saver, :backend,
+              :proxy_manager
 
-  def initialize(request_provider, response_saver, site_config)
+  def initialize(request_provider, response_saver, proxy_manager, site_config)
     @request_provider = request_provider
     @response_saver   = response_saver
+    @proxy_manager    = proxy_manager
     @config           = site_config
-    @backend          = HttpBackendFactory.get(site_config[:http_backend_type])
+    @client_ready     = false
 
     task_opts = {
       run_now: false,
@@ -23,13 +25,37 @@ class HttpClient
 
 private
 
-  def init
+  def init_client
+    backend = HttpBackendFactory.get(site_config[:http_backend_type])
+    backend.set_proxy(proxy_manager.get_proxy)
 
+    if site_config.respond_to?(:init)
+      site_config.init(backend)
+    end
+
+    @client_ready = true
+  end
+
+  def reset_client
+    backend.close
+    proxy_manager.release_proxy(backend.proxy)
+
+    @client_ready = false
   end
 
   def process_request
-    request = request_provider.get
-    response = backend.crawl(request)
-    response_saver.save(response)
+    if client_ready?
+      request = request_provider.get
+      response = backend.crawl(request)
+      response_saver.save(response)
+    else
+      init_client
+    end
   end
+
+
+  def client_ready?
+    @client_ready
+  end
+
 end

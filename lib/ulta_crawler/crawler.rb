@@ -1,4 +1,5 @@
 require_relative 'http/http_client_pool'
+require_relative 'proxy/proxy_manager'
 require_relative 'request/request_provider'
 require_relative 'response/response_saver'
 
@@ -14,8 +15,9 @@ class Crawler
 
     @request_provider = RequestProvider.new(site_config)
     @response_saver   = ResponseSaver.new(site_config)
+    @proxy_manager    = ProxyManager.new(site_config)
     @http_client_pool = HttpClientPool.new(
-        @request_provider, @response_saver, site_config)
+        @request_provider, @response_saver, @proxy_manager, site_config)
 
     @tasks = [@request_provider, @http_client_pool, @response_saver]
 

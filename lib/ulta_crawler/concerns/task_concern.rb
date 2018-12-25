@@ -1,4 +1,4 @@
-require 'concurrent-ruby'
+require 'concurrent/timer_task'
 
 
 module TaskConcern
